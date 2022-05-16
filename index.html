@@ -1,0 +1,91 @@
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+    crossorigin=""/>
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        #map {
+            /* configure the size of the map */
+            width: 100vw;
+            height: 50%;
+        }
+    </style>
+    <title>Experiment Tool</title>
+</head>
+<body>
+    <div id="map"> </div>
+    <div id="inputArea">
+        <h4> Coordinates</h4>
+        <a id="geoPosition"> </a>
+        <button onclick="setWatcher()"> Update </button>
+    </div>
+</body>
+
+<script>
+var map = L.map("map", { zoomControl: false }).setView([51.163361, 10.447683], 7);
+
+// L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//     maxZoom: 19,
+// }).addTo(map);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '',
+    maxZoom: 18,
+    tileSize: 512,
+    zoomOffset: -1
+}).addTo(map);
+
+var marker, circle, lat, long, accuracy, timestamp, watcher;
+var updateCount = 0;
+
+function displayPosition(position) {
+    updateCount += 1;
+    lat = position.coords.latitude;
+    long = position.coords.longitude;
+    accuracy = position.coords.accuracy;
+    timestamp = new Date(position.timestamp);
+
+    const el = document.getElementById("geoPosition");
+    // const options = { hour: "numeric" };
+    el.innerHTML = `${lat.toFixed(5)}, ${long.toFixed(5)} (updated: ${timestamp.toLocaleTimeString('de-DE')}, count: ${updateCount})`;
+
+    if (marker) {
+        map.removeLayer(marker);
+    }
+
+    if (circle) {
+        map.removeLayer(circle);
+    }
+
+    marker = L.marker([lat, long]);
+    circle = L.circle([lat, long], { radius: accuracy });
+
+    var featureGroup = L.featureGroup([marker, circle]).addTo(map);
+
+    map.fitBounds(featureGroup.getBounds());
+}
+
+function setWatcher() {
+    if (watcher)
+        navigator.geolocation.clearWatch(watcher);
+    watcher = navigator.geolocation.watchPosition(displayPosition,
+        (e) => {console.error("ERROR:", e); window.alert(e.message);},
+        {maximumAge: 5000, timeout: 5000});
+}
+
+if (!navigator.geolocation) {
+    console.log("Your browser doesn't support geolocation feature!");
+} else {
+    setWatcher();
+}
+</script>
