@@ -29,6 +29,10 @@
         <a id="geoPosition"> </a>
         <button onclick="setWatcher()"> Update </button>
         <div id="details"></div>
+        <label for="input-soc">State of Charge:</label>
+        <input type="number" id="input-soc" name="input-soc" min="0" max="100" step="0.01" placeholder="SoC in kWh"><br>
+        <label for="input-speed">Speed (kmh):</label>
+        <input type="number" id="input-speed" name="input-speed" min="0" max="140" step="1" placeholder="Speed in kmh"><br>
         <button onclick="downloadData()"> Download data </button>
         <button onclick="downloadLocalStorage()"> Download local storage</button>
         <button id="resetLocalStorage" onclick="resetLocalStorage()"> Reset local storage </button>
