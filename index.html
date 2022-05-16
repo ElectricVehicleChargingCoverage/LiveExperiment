@@ -29,6 +29,9 @@
         <a id="geoPosition"> </a>
         <button onclick="setWatcher()"> Update </button>
         <div id="details"></div>
+        <button onclick="downloadData()"> Download data </button>
+        <button onclick="downloadLocalStorage()"> Download local storage</button>
+        <button id="resetLocalStorage" onclick="resetLocalStorage()"> Reset local storage </button>
     </div>
 </body>
 
@@ -62,10 +65,13 @@ var updateCount = 0;
 
 function displayPosition(position) {
     updateCount += 1;
+    const posObject = geolocationToObject(position);
     lat = position.coords.latitude;
     long = position.coords.longitude;
     accuracy = position.coords.accuracy;
     timestamp = new Date(position.timestamp);
+
+    updateData(posObject);
 
     const el = document.getElementById("geoPosition");
     // const options = { hour: "numeric" };
@@ -86,6 +92,21 @@ function displayPosition(position) {
 
     fillinFields(position.coords);
     map.fitBounds(featureGroup.getBounds());
+}
+
+function geolocationToObject(position) {
+    const timestring = new Date(position.timestamp);
+    return {
+        timestamp: position.timestamp,
+        timestring: timestring.toLocaleTimeString("de-DE"),
+        accuracy: position.coords.accuracy,
+        altitude: position.coords.altitude,
+        altitudeAccuracy: position.coords.altitudeAccuracy,
+        heading: position.coords.heading,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        speed: position.coords.speed
+    };
 }
 
 function fillinFields(coords) {
@@ -111,5 +132,60 @@ if (!navigator.geolocation) {
     console.log("Your browser doesn't support geolocation feature!");
 } else {
     setWatcher();
+}
+
+// Datacollection:
+
+const sessionTime = (new Date()).toLocaleString();
+var data = [];
+var autosave = false; // CHANGE THIS IF NECESSARY
+
+function updateData(posObject) {
+    data.push(posObject);
+    updateLocalStorage();
+}
+
+function downloadCurrentData() {
+    downloadData(data, `exp_${sessionTime}`);
+}
+
+function downloadData(dataObject, filename) {
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObject, null, 4));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", `${filename}.json`);
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+window.onbeforeunload = function(){
+    if (data.length > 0 && autosave)
+        downloadData();
+}
+
+function resetLocalStorage() {
+    localStorage.clear();
+}
+
+document.getElementById("resetLocalStorage").innerHTML = `Reset local storage (${localStorage.length} items)`
+
+function downloadLocalStorage() {
+    console.log("Downloading local storage...");
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const d = localStorage.getItem(key);
+        try {
+            const parsed = JSON.parse(d);
+            downloadData(parsed, key);
+        } catch {
+            console.warn(`Error with parsing data of key "${key}".`);
+        }
+    }
+    console.log("Done.");
+}
+
+function updateLocalStorage() {
+    localStorage.setItem(`data_${sessionTime}`, JSON.stringify(data));
 }
 </script>
