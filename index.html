@@ -28,6 +28,7 @@
         <h4> Coordinates <a id="highAccuracy"></a></h4>
         <a id="geoPosition"> </a>
         <button onclick="setWatcher()"> Update </button>
+        <div id="details"></div>
     </div>
 </body>
 
@@ -83,7 +84,19 @@ function displayPosition(position) {
 
     var featureGroup = L.featureGroup([marker, circle]).addTo(map);
 
+    fillinFields(position.coords);
     map.fitBounds(featureGroup.getBounds());
+}
+
+function fillinFields(coords) {
+    const target = document.getElementById("details");
+    target.innerHTML = "";
+    target.innerHTML += `Accuracy: ${coords.accuracy.toFixed(3)} <br>`;
+    target.innerHTML += `Altitude: ${coords.altitude} <br>`;
+    target.innerHTML += `Altitude-accuracy: ${coords.altitudeAccuracy} <br>`;
+    target.innerHTML += `Heading: ${coords.heading} <br>`;
+    target.innerHTML += `Speed: ${coords.speed} <br>`;
+    
 }
 
 function setWatcher() {
