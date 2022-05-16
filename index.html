@@ -25,18 +25,15 @@
 <body>
     <div id="map"> </div>
     <div id="inputArea">
-        <h4> Coordinates</h4>
+        <h4> Coordinates <a id="highAccuracy"></a></h4>
         <a id="geoPosition"> </a>
         <button onclick="setWatcher()"> Update </button>
     </div>
 </body>
 
 <script>
+// Setup Map:
 var map = L.map("map", { zoomControl: false }).setView([51.163361, 10.447683], 7);
-
-// L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//     maxZoom: 19,
-// }).addTo(map);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '',
@@ -44,6 +41,20 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     tileSize: 512,
     zoomOffset: -1
 }).addTo(map);
+
+// Get Query Parameters:
+
+var enableHighAccuracy = false;
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+if (urlParams.get('highAccuracy').toLowerCase() == "true")
+{
+    console.log("Enabling high accuracy");
+    enableHighAccuracy = true;
+    document.getElementById("highAccuracy").innerHTML = "(High accuracy)";
+}
+
+// Geolocation:
 
 var marker, circle, lat, long, accuracy, timestamp, watcher;
 var updateCount = 0;
@@ -80,7 +91,7 @@ function setWatcher() {
         navigator.geolocation.clearWatch(watcher);
     watcher = navigator.geolocation.watchPosition(displayPosition,
         (e) => {console.error("ERROR:", e); window.alert(e.message);},
-        {maximumAge: 5000, timeout: 5000});
+        {maximumAge: 5000, timeout: 5000, enableHighAccuracy});
 }
 
 if (!navigator.geolocation) {
