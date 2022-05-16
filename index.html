@@ -48,7 +48,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var enableHighAccuracy = false;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-if (urlParams.get('highAccuracy') != "")
+if (urlParams.get('highAccuracy') == "true")
 {
     console.log("Enabling high accuracy");
     enableHighAccuracy = true;
