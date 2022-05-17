@@ -51,7 +51,7 @@
 <body>
     <div id="map"> </div>
     <div id="inputArea">
-        <h4> Coordinates <a id="highAccuracy"></a></h4>
+        <h4> Coordinates <a id="highAccuracy">(High accuracy)</a></h4>
         <a id="geoPosition"> </a>
         <button onclick="setWatcher()"> Reload Position </button>
         <table>
@@ -100,22 +100,25 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 // Get Query Parameters:
 
-var enableHighAccuracy = false;
+var enableHighAccuracy = true;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-if (urlParams.get('highAccuracy') == "true")
+if (urlParams.get('disableHighAccuracy') == "true")
 {
-    console.log("Enabling high accuracy");
-    enableHighAccuracy = true;
-    document.getElementById("highAccuracy").innerHTML = "(High accuracy)";
+    console.log("Disabling high accuracy");
+    enableHighAccuracy = false;
+    document.getElementById("highAccuracy").innerHTML = "";
 }
 
 // Geolocation:
 
-var marker, circle, lat, long, accuracy, timestamp, watcher, posObject;
+var marker, circle, lat, long, accuracy, watcher, posObject;
+var timestamp = 0;
 var updateCount = 0;
 
 function displayPosition(position) {
+    if (position.timestamp - timestamp < 5000)
+        return;
     updateCount += 1;
     posObject = geolocationToObject(position);
     lat = position.coords.latitude;
@@ -142,7 +145,7 @@ function displayPosition(position) {
 
     var featureGroup = L.featureGroup([marker, circle]).addTo(map);
 
-    fillinFields(position.coords);
+    fillinFields(posObject);
     map.fitBounds(featureGroup.getBounds());
 }
 
@@ -157,7 +160,7 @@ function geolocationToObject(position) {
         heading: position.coords.heading,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        speed: position.coords.speed
+        speed: position.coords.speed ? position.coords.speed * 3.6 : null
     };
 }
 
