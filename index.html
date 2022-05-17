@@ -156,7 +156,6 @@ function geolocationToObject(position) {
         timestring: timestring.toLocaleTimeString("de-DE"),
         accuracy: position.coords.accuracy,
         altitude: position.coords.altitude,
-        altitudeAccuracy: position.coords.altitudeAccuracy,
         heading: position.coords.heading,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
@@ -169,7 +168,6 @@ function fillinFields(coords) {
     target.innerHTML = "";
     target.innerHTML += `Accuracy: ${coords.accuracy.toFixed(3)} <br>`;
     target.innerHTML += `Altitude: ${coords.altitude} <br>`;
-    target.innerHTML += `Altitude-accuracy: ${coords.altitudeAccuracy} <br>`;
     target.innerHTML += `Heading: ${coords.heading} <br>`;
     target.innerHTML += `Speed: ${coords.speed} <br>`;
 }
@@ -224,9 +222,9 @@ function downloadDataString(dataString, dataFormat, filename) {
 
 function downloadCsv(object, filename) {
     let str = "";
-    str += "timestamp, timestring, accuracy, altitude, altitudeAccuracy, heading, latitude, longitude, speed, automatic, speedInput, SoC\n";
+    str += "timestamp, timestring, accuracy, altitude, heading, latitude, longitude, speed, automatic, speedInput, SoC\n";
     object.forEach((i) => {
-        const itemString = `${i.timestamp}, ${i.timestring}, ${i.accuracy}, ${i.altitude}, ${i.altitudeAccuracy}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
+        const itemString = `${i.timestamp}, ${i.timestring}, ${i.accuracy}, ${i.altitude}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
         str += itemString;
     })
     downloadDataString(str, "csv", filename);
