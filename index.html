@@ -226,7 +226,7 @@ function downloadCsv(object, filename) {
     object.forEach((i) => {
         const itemString = `${i.timestamp}, ${i.timestring}, ${i.accuracy}, ${i.altitude}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
         str += itemString;
-    })
+    });
     downloadDataString(str, "csv", filename);
 }
 
