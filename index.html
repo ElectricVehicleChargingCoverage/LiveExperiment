@@ -36,7 +36,7 @@
             position: fixed;
             width: 100%;
             background-color: red;
-            bottom: 30px;
+            bottom: 0px;
         }
         #downloadDiv {
             position: fixed;
@@ -169,7 +169,6 @@ function fillinFields(coords) {
     target.innerHTML += `Altitude-accuracy: ${coords.altitudeAccuracy} <br>`;
     target.innerHTML += `Heading: ${coords.heading} <br>`;
     target.innerHTML += `Speed: ${coords.speed} <br>`;
-    
 }
 
 function setWatcher() {
@@ -206,13 +205,28 @@ function downloadCurrentData() {
 }
 
 function downloadData(dataObject, filename) {
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObject, null, 4));
+    downloadCsv(dataObject, filename);
+    downloadDataString(JSON.stringify(dataObject, null, 4), "json", filename);
+}
+
+function downloadDataString(dataString, dataFormat, filename) {
+    var dataStr = `data:text/${dataFormat};charset=utf-8,` + encodeURIComponent(dataString);
     var downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", `${filename}.json`);
+    downloadAnchorNode.setAttribute("download", `${filename}.${dataFormat}`);
     document.body.appendChild(downloadAnchorNode); // required for firefox
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+}
+
+function downloadCsv(object, filename) {
+    let str = "";
+    str += "timestamp, timestring, accuracy, altitude, altitudeAccuracy, heading, latitude, longitude, speed, automatic, speedInput, SoC\n";
+    object.forEach((i) => {
+        const itemString = `${i.timestamp}, ${i.timestring}, ${i.accuracy}, ${i.altitude}, ${i.altitudeAccuracy}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
+        str += itemString;
+    })
+    downloadDataString(str, "csv", filename);
 }
 
 window.onbeforeunload = function(){
