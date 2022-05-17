@@ -19,6 +19,32 @@
             width: 100vw;
             height: 50%;
         }
+        button {
+            border-radius: 5px;
+            background-color: rgb(104, 156, 246);
+            border-width: 1px;
+            padding: 5px;
+            margin-left: 3px;
+        }
+        button:hover {
+            transform: scale(1.1);
+        }
+        input {
+            width: 100%;
+        }
+        #errorDiv {
+            position: fixed;
+            width: 100%;
+            background-color: red;
+            bottom: 30px;
+        }
+        #downloadDiv {
+            position: fixed;
+            width: 100%;
+            bottom: 0px;
+            background-color: rgb(114, 170, 158);
+            padding: 5px;
+        }
     </style>
     <title>Experiment Tool</title>
 </head>
@@ -27,11 +53,37 @@
     <div id="inputArea">
         <h4> Coordinates <a id="highAccuracy"></a></h4>
         <a id="geoPosition"> </a>
-        <button onclick="setWatcher()"> Update </button>
+        <button onclick="setWatcher()"> Reload Position </button>
+        <table>
+            <tr>
+                <td><label for="input-soc">State of Charge (%):</label></td>
+                <td><input type="number" id="input-soc" name="input-soc" min="0" max="100" step="0.1" placeholder="SoC in kWh"></td>
+                <td>
+                    <button onclick="changeInputValue('input-soc', -10)">-10</button>
+                    <button onclick="changeInputValue('input-soc', -1)">-1</button>
+                    <button onclick="changeInputValue('input-soc', +1)">+1</button>
+                    <button onclick="changeInputValue('input-soc', +10)">+10</button>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="input-speed">Speed (kmh):</label></td>
+                <td><input type="number" id="input-speed" name="input-speed" min="0" max="140" step="1" placeholder="Speed in kmh"></td>
+                <td>
+                    <button onclick="changeInputValue('input-speed', -10)">-10</button>
+                    <button onclick="changeInputValue('input-speed', -5)">-5</button>
+                    <button onclick="changeInputValue('input-speed', +5)">+5</button>
+                    <button onclick="changeInputValue('input-speed', +10)">+10</button>
+                </td>
+            </tr>
+        </table> 
+        <button onclick="updateData(false)">Create manual data</button>
         <div id="details"></div>
-        <button onclick="downloadData()"> Download data </button>
-        <button onclick="downloadLocalStorage()"> Download local storage</button>
-        <button id="resetLocalStorage" onclick="resetLocalStorage()"> Reset local storage </button>
+        <div id="downloadDiv">
+            <button onclick="downloadCurrentData()"> Download data </button>
+            <button onclick="downloadLocalStorage()"> Download local storage</button>
+            <button id="resetLocalStorage" onclick="resetLocalStorage()"> Reset local storage </button>
+        </div>
+        <div id="errorDiv"></div>
     </div>
 </body>
 
@@ -60,18 +112,18 @@ if (urlParams.get('highAccuracy') == "true")
 
 // Geolocation:
 
-var marker, circle, lat, long, accuracy, timestamp, watcher;
+var marker, circle, lat, long, accuracy, timestamp, watcher, posObject;
 var updateCount = 0;
 
 function displayPosition(position) {
     updateCount += 1;
-    const posObject = geolocationToObject(position);
+    posObject = geolocationToObject(position);
     lat = position.coords.latitude;
     long = position.coords.longitude;
     accuracy = position.coords.accuracy;
     timestamp = new Date(position.timestamp);
 
-    updateData(posObject);
+    updateData();
 
     const el = document.getElementById("geoPosition");
     // const options = { hour: "numeric" };
@@ -124,7 +176,7 @@ function setWatcher() {
     if (watcher)
         navigator.geolocation.clearWatch(watcher);
     watcher = navigator.geolocation.watchPosition(displayPosition,
-        (e) => {console.error("ERROR:", e); window.alert(e.message);},
+        (e) => {error(e.message); window.alert(e.message);},
         {maximumAge: 5000, timeout: 5000, enableHighAccuracy});
 }
 
@@ -140,8 +192,12 @@ const sessionTime = (new Date()).toLocaleString();
 var data = [];
 var autosave = false; // CHANGE THIS IF NECESSARY
 
-function updateData(posObject) {
-    data.push(posObject);
+function updateData(automatic = true) {
+    const obj = JSON.parse(JSON.stringify(posObject));
+    obj["automatic"] = automatic;
+    obj["speedInput"] = parseFloat(document.getElementById("input-speed").value);
+    obj["SoCInput"] = parseFloat(document.getElementById("input-soc").value);
+    data.push(obj);
     updateLocalStorage();
 }
 
@@ -179,13 +235,38 @@ function downloadLocalStorage() {
             const parsed = JSON.parse(d);
             downloadData(parsed, key);
         } catch {
-            console.warn(`Error with parsing data of key "${key}".`);
+            error(`Error with parsing data of key "${key}".`);
         }
     }
     console.log("Done.");
 }
 
+function changeInputValue(id, change) {
+    const el = document.getElementById(id);
+    let currentValue = parseFloat(el.value);
+    if (isNaN(currentValue))
+        currentValue = 0.0;
+    let newValue = currentValue + change;
+    if (el.min)
+        newValue = Math.max(parseFloat(el.min), newValue);
+    if (el.max)
+        newValue = Math.min(parseFloat(el.max), newValue);
+    el.value = newValue;
+}
+
 function updateLocalStorage() {
-    localStorage.setItem(`data_${sessionTime}`, JSON.stringify(data));
+    try {
+        localStorage.setItem(`data_${sessionTime}`, JSON.stringify(data));
+    } catch {
+        error("Error when setting local storage.");
+    }
+}
+
+function error(message) {
+    console.error(message);
+    document.getElementById("errorDiv").innerHTML = message;
+    setInterval(() => {
+        document.getElementById("errorDiv").innerHTML = "";
+    }, 20000);
 }
 </script>
