@@ -77,6 +77,7 @@
             </tr>
         </table> 
         <button onclick="updateData(false)">Create manual data</button>
+        <button onclick="resetTripTime()">Reset trip start</button>
         <div id="details"></div>
         <div id="downloadDiv">
             <button onclick="downloadCurrentData()"> Download data </button>
@@ -154,6 +155,7 @@ function geolocationToObject(position) {
     return {
         timestamp: position.timestamp,
         timestring: timestring.toLocaleTimeString("de-DE"),
+        tripTime: Math.round((timestring - sessionTimestamp) / 1000),
         accuracy: position.coords.accuracy,
         altitude: position.coords.altitude,
         heading: position.coords.heading,
@@ -166,6 +168,7 @@ function geolocationToObject(position) {
 function fillinFields(coords) {
     const target = document.getElementById("details");
     target.innerHTML = "";
+    target.innerHTML += `Trip time: ${coords.tripTime} <br>`;
     target.innerHTML += `Accuracy: ${coords.accuracy.toFixed(3)} <br>`;
     target.innerHTML += `Altitude: ${coords.altitude} <br>`;
     target.innerHTML += `Heading: ${coords.heading} <br>`;
@@ -187,6 +190,12 @@ if (!navigator.geolocation) {
 }
 
 // Datacollection:
+
+const sessionTimestamp = new Date();
+
+function resetTripTime() {
+    sessionTimestamp = new Date();
+}
 
 const sessionTime = (new Date()).toLocaleString();
 var data = [];
@@ -222,9 +231,9 @@ function downloadDataString(dataString, dataFormat, filename) {
 
 function downloadCsv(object, filename) {
     let str = "";
-    str += "timestamp, timestring, accuracy, altitude, heading, latitude, longitude, speed, automatic, speedInput, SoC\n";
+    str += "timestamp, timestring, tripTime, accuracy, altitude, heading, latitude, longitude, speed, automatic, speedInput, SoC\n";
     object.forEach((i) => {
-        const itemString = `${i.timestamp}, ${i.timestring}, ${i.accuracy}, ${i.altitude}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
+        const itemString = `${i.timestamp}, ${i.timestring}, ${i.tripTime}, ${i.accuracy}, ${i.altitude}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
         str += itemString;
     });
     downloadDataString(str, "csv", filename);
