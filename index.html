@@ -90,6 +90,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     zoomOffset: -1
 }).addTo(map);
 
+function removeLeafletAttribution() { //to avoid accidental clicking
+    try {
+        const attribution = document.getElementsByClassName("leaflet-control-attribution leaflet-control");
+        attribution[0].parentNode.removeChild(attribution[0]);
+    }
+    finally {}
+}
+removeLeafletAttribution();
 // Get Query Parameters:
 
 var enableHighAccuracy = true;
