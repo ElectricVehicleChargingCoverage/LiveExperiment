@@ -178,7 +178,7 @@ function setWatcher() {
     if (watcher)
         navigator.geolocation.clearWatch(watcher);
     watcher = navigator.geolocation.watchPosition(displayPosition,
-        (e) => {error(e.message); window.alert(e.message);},
+        (e) => {window.alert(e.message); error(e.message);},
         {maximumAge: 5000, timeout: 5000, enableHighAccuracy});
 }
 
@@ -286,7 +286,7 @@ function updateLocalStorage() {
 
 function error(message) {
     console.error(message);
-    window.navigator.vibrate(200);
+    window.navigator.vibrate(500);
     document.getElementById("errorDiv").innerHTML = message;
     setInterval(() => {
         document.getElementById("errorDiv").innerHTML = "";
