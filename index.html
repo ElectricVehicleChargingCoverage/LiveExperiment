@@ -65,16 +65,6 @@
                     <button onclick="changeInputValue('input-soc', +10)">+10</button>
                 </td>
             </tr>
-            <tr>
-                <td><label for="input-speed">Speed (kmh):</label></td>
-                <td><input type="number" id="input-speed" name="input-speed" min="0" max="140" step="1" placeholder="Speed in kmh"></td>
-                <td>
-                    <button onclick="changeInputValue('input-speed', -10)">-10</button>
-                    <button onclick="changeInputValue('input-speed', -5)">-5</button>
-                    <button onclick="changeInputValue('input-speed', +5)">+5</button>
-                    <button onclick="changeInputValue('input-speed', +10)">+10</button>
-                </td>
-            </tr>
         </table> 
         <button onclick="updateData(false)">Create manual data</button>
         <button onclick="resetTripTime()">Reset trip start</button>
@@ -100,6 +90,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     zoomOffset: -1
 }).addTo(map);
 
+function removeLeafletAttribution() { //to avoid accidental clicking
+    try {
+        const attribution = document.getElementsByClassName("leaflet-control-attribution leaflet-control");
+        attribution[0].parentNode.removeChild(attribution[0]);
+    }
+    finally {}
+}
+removeLeafletAttribution();
 // Get Query Parameters:
 
 var enableHighAccuracy = true;
@@ -157,12 +155,12 @@ function geolocationToObject(position) {
         timestamp: position.timestamp,
         timestring: timestring.toLocaleTimeString("de-DE"),
         tripTime: Math.round((timestring - sessionTimestamp) / 1000),
-        accuracy: position.coords.accuracy,
-        altitude: position.coords.altitude,
+        accuracy: Math.round(position.coords.accuracy * 100) / 100,
+        altitude: Math.round(position.coords.altitude * 100) / 100,
         heading: position.coords.heading,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        speed: position.coords.speed ? position.coords.speed * 3.6 : null
+        speed: position.coords.speed ? Math.round(position.coords.speed * 3.6 * 100)/100. : null
     };
 }
 
@@ -170,7 +168,7 @@ function fillinFields(coords) {
     const target = document.getElementById("details");
     target.innerHTML = "";
     target.innerHTML += `Trip time: ${coords.tripTime} <br>`;
-    target.innerHTML += `Accuracy: ${coords.accuracy.toFixed(3)} <br>`;
+    target.innerHTML += `Accuracy: ${coords.accuracy} <br>`;
     target.innerHTML += `Altitude: ${coords.altitude} <br>`;
     target.innerHTML += `Heading: ${coords.heading} <br>`;
     target.innerHTML += `Speed: ${coords.speed} <br>`;
@@ -185,7 +183,7 @@ function setWatcher() {
 }
 
 if (!navigator.geolocation) {
-    console.log("Your browser doesn't support geolocation feature!");
+    error("Your browser doesn't support geolocation feature!");
 } else {
     setWatcher();
 }
@@ -205,7 +203,6 @@ var autosave = false; // CHANGE THIS IF NECESSARY
 function updateData(automatic = true) {
     const obj = JSON.parse(JSON.stringify(posObject));
     obj["automatic"] = automatic;
-    obj["speedInput"] = parseFloat(document.getElementById("input-speed").value);
     obj["SoCInput"] = parseFloat(document.getElementById("input-soc").value);
     data.push(obj);
     updateLocalStorage();
@@ -232,9 +229,9 @@ function downloadDataString(dataString, dataFormat, filename) {
 
 function downloadCsv(object, filename) {
     let str = "";
-    str += "timestamp, timestring, tripTime, accuracy, altitude, heading, latitude, longitude, speed, automatic, speedInput, SoC\n";
+    str += "timestamp,timestring,tripTime,accuracy,altitude,heading,latitude,longitude,speed,automatic,SoC\n";
     object.forEach((i) => {
-        const itemString = `${i.timestamp}, ${i.timestring}, ${i.tripTime}, ${i.accuracy}, ${i.altitude}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.speedInput}, ${i.SoCInput}\n`;
+        const itemString = `${i.timestamp},${i.timestring},${i.tripTime},${i.accuracy},${i.altitude},${i.heading},${i.latitude},${i.longitude},${i.speed},${i.automatic},${i.SoCInput}\n`;
         str += itemString;
     });
     downloadDataString(str, "csv", filename);
