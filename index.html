@@ -155,12 +155,12 @@ function geolocationToObject(position) {
         timestamp: position.timestamp,
         timestring: timestring.toLocaleTimeString("de-DE"),
         tripTime: Math.round((timestring - sessionTimestamp) / 1000),
-        accuracy: position.coords.accuracy,
-        altitude: position.coords.altitude,
+        accuracy: Math.round(position.coords.accuracy * 100) / 100,
+        altitude: Math.round(position.coords.altitude * 100) / 100,
         heading: position.coords.heading,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        speed: position.coords.speed ? position.coords.speed * 3.6 : null
+        speed: position.coords.speed ? Math.round(position.coords.speed * 3.6 * 100)/100. : null
     };
 }
 
@@ -183,7 +183,7 @@ function setWatcher() {
 }
 
 if (!navigator.geolocation) {
-    console.log("Your browser doesn't support geolocation feature!");
+    error("Your browser doesn't support geolocation feature!");
 } else {
     setWatcher();
 }
