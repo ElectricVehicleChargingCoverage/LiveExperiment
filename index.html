@@ -229,9 +229,9 @@ function downloadDataString(dataString, dataFormat, filename) {
 
 function downloadCsv(object, filename) {
     let str = "";
-    str += "timestamp, timestring, tripTime, accuracy, altitude, heading, latitude, longitude, speed, automatic, SoC\n";
+    str += "timestamp,timestring,tripTime,accuracy,altitude,heading,latitude,longitude,speed,automatic,SoC\n";
     object.forEach((i) => {
-        const itemString = `${i.timestamp}, ${i.timestring}, ${i.tripTime}, ${i.accuracy}, ${i.altitude}, ${i.heading}, ${i.latitude}, ${i.longitude}, ${i.speed}, ${i.automatic}, ${i.SoCInput}\n`;
+        const itemString = `${i.timestamp},${i.timestring},${i.tripTime},${i.accuracy},${i.altitude},${i.heading},${i.latitude},${i.longitude},${i.speed},${i.automatic},${i.SoCInput}\n`;
         str += itemString;
     });
     downloadDataString(str, "csv", filename);
