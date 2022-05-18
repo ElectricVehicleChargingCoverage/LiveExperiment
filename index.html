@@ -168,7 +168,7 @@ function fillinFields(coords) {
     const target = document.getElementById("details");
     target.innerHTML = "";
     target.innerHTML += `Trip time: ${coords.tripTime} <br>`;
-    target.innerHTML += `Accuracy: ${coords.accuracy.toFixed(3)} <br>`;
+    target.innerHTML += `Accuracy: ${coords.accuracy} <br>`;
     target.innerHTML += `Altitude: ${coords.altitude} <br>`;
     target.innerHTML += `Heading: ${coords.heading} <br>`;
     target.innerHTML += `Speed: ${coords.speed} <br>`;
