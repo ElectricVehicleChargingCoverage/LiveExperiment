@@ -79,6 +79,7 @@
         <button onclick="updateData(false)">Create manual data</button>
         <button onclick="resetTripTime()">Reset trip start</button>
         <div id="details"></div>
+        <button onclick="getScreenLock()"> Request screenlock <a id="screenlock-status"></a></button>
         <div id="downloadDiv">
             <button onclick="downloadCurrentData()"> Download data </button>
             <button onclick="downloadLocalStorage()"> Download local storage</button>
@@ -293,4 +294,31 @@ function error(message) {
         document.getElementById("errorDiv").innerHTML = "";
     }, 20000);
 }
+
+function isScreenLockSupported() {
+    return ('wakeLock' in navigator);
+}
+var screenLock;
+async function getScreenLock() {
+    if(isScreenLockSupported()){
+        try {
+            navigator.wakeLock.request('screen')
+                .then(lock => { 
+                    screenLock = lock;
+                    console.log("Screenlock granted:", lock);
+                    document.getElementById("screenlock-status").innerHTML = "(on)";
+                    screenLock.onrelease = () => {
+                        error("Screenlock was released.");
+                        document.getElementById("screenlock-status").innerHTML = "(off)";
+                    };
+                });
+        } catch(err) {
+            error(err.message);
+        }
+    } else {
+        error("Screenlock is not supported on this device.");
+    }
+}
+
+getScreenLock();
 </script>
