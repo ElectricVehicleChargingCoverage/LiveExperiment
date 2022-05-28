@@ -5,7 +5,7 @@ filename = input("Filename in data Folder (without .json ending):")
 
 SoCMap = {}
 
-batteryCapacity = 79000.0 # max battery capacity in Wh
+batteryCapacity = 73500.0 # max battery capacity in Wh
 
 
 def distanceBetween(lat1, lon1, lat2, lon2):
