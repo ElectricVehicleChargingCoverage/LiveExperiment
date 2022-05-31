@@ -37,13 +37,19 @@ with open(f"output/{filename}.json", encoding='ascii') as input_file:
             lastEntryIndex = index
 
             soc_diff = apiEntry["soc_percent"] * 100 - data[index]["SoCInput"]
+            apiEntry["SoC_measured"] = data[index]["SoCInput"]
             apiEntry["soc_diff"] = soc_diff
+            apiEntry["floored_soc_diff"] = math.floor(soc_diff)
             apiEntry["abs_soc_diff"] = abs(soc_diff)
 
 
         with open(f'output/{filename}_comparison.csv', 'w') as csvFile:
-            csvFile.write("latitude,longitude,soc_difference,absolute_difference\n")
+            csvFile.write("latitude,longitude,soc_difference,floored_soc_difference,absolute_difference,remaining_kWh,SoC,SoC_measured\n")
+            first = True
             for p in points:
-                csvFile.write(f"{p['latitude']},{p['longitude']},{p['soc_diff']},{p['abs_soc_diff']}\n")
+                if first: # Skip first point
+                    first = False
+                    continue
+                csvFile.write(f"{p['latitude']},{p['longitude']},{p['soc_diff']},{p['floored_soc_diff']},{p['abs_soc_diff']},{p['soc']},{p['soc_percent']*100},{p['SoC_measured']}\n")
 
 print("Done")
